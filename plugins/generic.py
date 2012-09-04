@@ -9,7 +9,7 @@ class Generic:
   ifNameOID = ".1.3.6.1.2.1.31.1.1.1.1"
   ifAliasOID = ".1.3.6.1.2.1.31.1.1.1.18"
   ifSpeedOID =  ".1.3.6.1.2.1.2.2.1.5"
-  ifMtuOID = ".1.3.6.1.2.1.2.2.1.5"
+  ifMtuOID = ".1.3.6.1.2.1.2.2.1.4"
 
   deviceNameOID = ".1.3.6.1.2.1.1.5"
   deviceSystemOID = ".1.3.6.1.2.1.1.1"
@@ -38,10 +38,12 @@ class Generic:
     pattern = oid.replace(".","\.")+"\."+"(\d+)\s+=\s+(.*)"
     output = output.replace("\r","")
     result = re.findall(pattern, output)
-    print result
     data = {}
     for r in result:
-      data[r[0]] = r[1].strip("\"").strip("\n")
+      v = r[1].strip("\"").strip("\n")
+      if v == "":
+        v = "-"
+      data[r[0]] = v
     return data
 
   def getStrippedOIDKeyData(self, oid):
@@ -52,9 +54,7 @@ class Generic:
     return data
 
   def buildSpeedString(self, speed):
-    print speed
     match = re.findall("10000000{1,3}\\b", speed)
-    print match
     if match:
       speed = self.speeds[speed]
     else:
@@ -72,9 +72,10 @@ class Generic:
     ifNameTable = self.getStrippedOIDKeyValueData(self.ifNameOID)
     ifAliasTable = self.getStrippedOIDKeyValueData(self.ifAliasOID)
     ifSpeedTable = self.getStrippedOIDKeyValueData(self.ifSpeedOID)
+    ifMtuTable = self.getStrippedOIDKeyValueData(self.ifMtuOID)
     
     for i in ifIndexArray:
-      self.interfaceTable[i] = {"name":ifNameTable[i], "alias":ifAliasTable[i], "speed":self.buildSpeedString(ifSpeedTable[i])}
+      self.interfaceTable[i] = {"name":ifNameTable[i], "alias":ifAliasTable[i], "speed":self.buildSpeedString(ifSpeedTable[i]), "mtu":ifMtuTable[i]}
     return self.interfaceTable
 
 
