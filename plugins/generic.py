@@ -39,11 +39,11 @@ class Generic:
     output = output.replace("\r","")
     result = re.findall(pattern, output)
     data = {}
-    for r in result:
-      v = r[1].strip("\"").strip("\n")
+    for k,v in result:
+      v = v.strip("\"").strip("\n")
       if v == "":
         v = "-"
-      data[r[0]] = v
+      data[k] = v
     return data
 
   def getStrippedOIDKeyData(self, oid):
