@@ -17,7 +17,7 @@ class Generic:
   
   interfaceTable = {}
   
-  speeds = {"10000000":"10M", "100000000":"100M", "1000000000":"1G", "4294967295":"other"}
+  speeds = {"10000000":"10M", "100000000":"100M", "1000000000":"1G", "10000000000":"10G"}
   
   ip = ""
   community = ""
@@ -51,9 +51,15 @@ class Generic:
     data = re.findall(pattern, output)
     return data
 
-  def getIfIndexData(self):
-    data = self.getStrippedOIDKeyData(self.ifIndexOID)
-    return data
+  def buildSpeedString(self, speed):
+    print speed
+    match = re.findall("10000000{1,3}\\b", speed)
+    print match
+    if match:
+      speed = self.speeds[speed]
+    else:
+      speed = "other"
+    return speed
 
   def getIfNameData(self):
     data = self.getStrippedOIDKeyValueData(self.ifNameOID)
@@ -68,7 +74,7 @@ class Generic:
     ifSpeedTable = self.getStrippedOIDKeyValueData(self.ifSpeedOID)
     
     for i in ifIndexArray:
-      self.interfaceTable[i] = {"name":ifNameTable[i], "alias":ifAliasTable[i], "speed":self.speeds[ifSpeedTable[i]]}
+      self.interfaceTable[i] = {"name":ifNameTable[i], "alias":ifAliasTable[i], "speed":self.buildSpeedString(ifSpeedTable[i])}
     return self.interfaceTable
 
 
