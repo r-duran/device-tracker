@@ -73,9 +73,10 @@ class Generic:
     ifAliasTable = self.getStrippedOIDKeyValueData(self.ifAliasOID)
     ifSpeedTable = self.getStrippedOIDKeyValueData(self.ifSpeedOID)
     ifMtuTable = self.getStrippedOIDKeyValueData(self.ifMtuOID)
+    ifDescriptionTable = self.getStrippedOIDKeyValueData(self.ifDescriptionOID)
     
     for i in ifIndexArray:
-      self.interfaceTable[i] = {"name":ifNameTable[i], "alias":ifAliasTable[i], "speed":self.buildSpeedString(ifSpeedTable[i]), "mtu":ifMtuTable[i]}
+      self.interfaceTable[i] = {"name":ifNameTable[i], "alias":ifAliasTable[i], "speed":self.buildSpeedString(ifSpeedTable[i]), "mtu":ifMtuTable[i], "description":ifDescriptionTable[i]}
     return self.interfaceTable
 
 
