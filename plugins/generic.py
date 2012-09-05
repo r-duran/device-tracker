@@ -10,12 +10,14 @@ class Generic:
   ifAliasOID = ".1.3.6.1.2.1.31.1.1.1.18"
   ifSpeedOID =  ".1.3.6.1.2.1.2.2.1.5"
   ifMtuOID = ".1.3.6.1.2.1.2.2.1.4"
+  ifPvidOID = ".1.3.6.1.2.1.17.7.1.4.5.1.1"
 
   deviceNameOID = ".1.3.6.1.2.1.1.5"
   deviceSystemOID = ".1.3.6.1.2.1.1.1"
   deviceLocationOID = ".1.3.6.1.2.1.1.6"
   
   interfaceTable = {}
+  vlanNameTable = {}
   
   speeds = {"10000000":"10M", "100000000":"100M", "1000000000":"1G", "10000000000":"10G"}
   
@@ -61,7 +63,7 @@ class Generic:
       speed = "other"
     return speed
 
-  def getIfNameData(self):
+  def buildVlanNameTable(self):
     data = self.getStrippedOIDKeyValueData(self.ifNameOID)
     for d in data.keys():
       data[d] = data[d].strip("\"")
@@ -74,10 +76,36 @@ class Generic:
     ifSpeedTable = self.getStrippedOIDKeyValueData(self.ifSpeedOID)
     ifMtuTable = self.getStrippedOIDKeyValueData(self.ifMtuOID)
     ifDescriptionTable = self.getStrippedOIDKeyValueData(self.ifDescriptionOID)
+    ifPvidTable = self.getStrippedOIDKeyValueData(self.ifPvidOID)
     
     for i in ifIndexArray:
-      self.interfaceTable[i] = {"name":ifNameTable[i], "alias":ifAliasTable[i], "speed":self.buildSpeedString(ifSpeedTable[i]), "mtu":ifMtuTable[i], "description":ifDescriptionTable[i]}
-    return self.interfaceTable
+      value = "-"
+      if i in ifNameTable:
+        value = ifNameTable[i]
+      self.interfaceTable[i] = {"name":value}
+      print self.interfaceTable
+      value = "-"
+      if i in ifAliasTable:
+        value = ifAliasTable[i]
+      self.interfaceTable[i].update({"alias":value})
+      print self.interfaceTable
+      value = "-"
+      if i in ifSpeedTable:
+        value = self.buildSpeedString(ifSpeedTable[i])
+      self.interfaceTable[i].update({"speed":value})
+      value = "-"
+      if i in ifMtuTable:
+        value = ifMtuTable[i]
+      self.interfaceTable[i].update({"mtu":value})
+      value = "-"
+      if i in ifDescriptionTable:
+        value = ifDescriptionTable[i]
+      self.interfaceTable[i].update({"description":value})
+      value = "-"
+      if i in ifPvidTable:
+        value = ifPvidTable[i]
+      self.interfaceTable[i].update({"pvid":value})
+
 
 
 
