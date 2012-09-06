@@ -9,6 +9,5 @@ dev = Generic('192.168.10.98', 'as4950')
 print dev.name
 print dev.system
 print dev.location
-data = dev.buildInterfaceTable()
+dev.buildMacTable()
 
-pp.pprint(data)

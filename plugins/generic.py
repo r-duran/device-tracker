@@ -12,12 +12,18 @@ class Generic:
   ifMtuOID = ".1.3.6.1.2.1.2.2.1.4"
   ifPvidOID = ".1.3.6.1.2.1.17.7.1.4.5.1.1"
 
+  macVlanOID = ".1.3.6.1.2.1.17.7.1.2.2.1.2"
+  portnumToIfIndexOID = ".1.3.6.1.2.1.17.1.4.1.2"
+  
+  vlanNameOID = ".1.3.6.1.2.1.17.7.1.4.3.1.1"
+
   deviceNameOID = ".1.3.6.1.2.1.1.5"
   deviceSystemOID = ".1.3.6.1.2.1.1.1"
   deviceLocationOID = ".1.3.6.1.2.1.1.6"
   
   interfaceTable = {}
-  vlanNameTable = {}
+  vlanTable = {}
+  macTable = {}
   
   speeds = {"10000000":"10M", "100000000":"100M", "1000000000":"1G", "10000000000":"10G"}
   
@@ -37,7 +43,7 @@ class Generic:
   def getStrippedOIDKeyValueData(self, oid):
     args = ['snmpbulkwalk', '-v2c', '-OnQ', '-c', self.community, self.ip, oid]
     output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
-    pattern = oid.replace(".","\.")+"\."+"(\d+)\s+=\s+(.*)"
+    pattern = oid.replace(".","\.")+"\."+"([^\s]+)\s+=\s+(.*)"
     output = output.replace("\r","")
     result = re.findall(pattern, output)
     data = {}
@@ -51,7 +57,7 @@ class Generic:
   def getStrippedOIDKeyData(self, oid):
     args = ['snmpbulkwalk', '-v2c', '-OnQ', '-c', self.community, self.ip, oid]
     output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
-    pattern = oid.replace(".","\.")+"\."+"(\d+)\s+="
+    pattern = oid.replace(".","\.")+"\."+"([^\s]+)\s+="
     data = re.findall(pattern, output)
     return data
 
@@ -63,11 +69,18 @@ class Generic:
       speed = "other"
     return speed
 
-  def buildVlanNameTable(self):
-    data = self.getStrippedOIDKeyValueData(self.ifNameOID)
-    for d in data.keys():
-      data[d] = data[d].strip("\"")
-    return data
+  def buildVlanTable(self):
+    self.vlanTable = self.getStrippedOIDKeyValueData(self.vlanNameOID)
+
+  def getMacFromOIDString(self, oid):
+    match = re.match("(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})", oid)
+    macStr = "-"
+    if match:
+      macStr=""
+      for m in match.groups():
+        macStr = macStr + ":" +  hex(int(m)).replace("0x", "")
+      macStr = macStr.lstrip(":")
+    return macStr
 
   def buildInterfaceTable(self):
     ifIndexArray = self.getStrippedOIDKeyData(self.ifIndexOID)
@@ -83,12 +96,10 @@ class Generic:
       if i in ifNameTable:
         value = ifNameTable[i]
       self.interfaceTable[i] = {"name":value}
-      print self.interfaceTable
       value = "-"
       if i in ifAliasTable:
         value = ifAliasTable[i]
       self.interfaceTable[i].update({"alias":value})
-      print self.interfaceTable
       value = "-"
       if i in ifSpeedTable:
         value = self.buildSpeedString(ifSpeedTable[i])
@@ -105,6 +116,15 @@ class Generic:
       if i in ifPvidTable:
         value = ifPvidTable[i]
       self.interfaceTable[i].update({"pvid":value})
+
+  def buildMacTable(self):
+    self.buildInterfaceTable()
+    self.buildVlanTable()
+    for pvid, vname in self.vlanTable.items():
+      macVlanTable = self.getStrippedOIDKeyValueData(self.macVlanOID+"."+pvid)
+      for mac,portnum in macVlanTable.items():
+        self.macTable[mac] = {"ifindex":portnum, "vlan":pvid, "vlan_name":vname}
+    print self.macTable
 
 
 
