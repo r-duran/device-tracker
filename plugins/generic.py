@@ -80,7 +80,10 @@ class Generic:
     if match:
       macStr=""
       for m in match.groups():
-        macStr = macStr + ":" +  hex(int(m)).replace("0x", "")
+        digit = hex(int(m)).replace("0x", "")
+        if len(digit) == 1:
+          digit = "0" + digit
+        macStr = macStr + ":" + digit 
       macStr = macStr.lstrip(":")
     return macStr
 
