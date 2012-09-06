@@ -39,6 +39,8 @@ class Generic:
     self.name = self.getStrippedOIDKeyValueData(self.deviceNameOID)["0"]
     self.system = self.getStrippedOIDKeyValueData(self.deviceSystemOID)["0"]
     self.location = self.getStrippedOIDKeyValueData(self.deviceLocationOID)["0"]
+    
+    self.buildMacTable()
 
   def getStrippedOIDKeyValueData(self, oid):
     args = ['snmpbulkwalk', '-v2c', '-OnQ', '-c', self.community, self.ip, oid]
@@ -120,11 +122,22 @@ class Generic:
   def buildMacTable(self):
     self.buildInterfaceTable()
     self.buildVlanTable()
-    for pvid, vname in self.vlanTable.items():
-      macVlanTable = self.getStrippedOIDKeyValueData(self.macVlanOID+"."+pvid)
+    for vId, vName in self.vlanTable.items():
+      macVlanTable = self.getStrippedOIDKeyValueData(self.macVlanOID+"."+vId)
       for mac,portnum in macVlanTable.items():
-        self.macTable[mac] = {"ifindex":portnum, "vlan":pvid, "vlan_name":vname}
-    print self.macTable
+        self.macTable[mac] = {"ifindex":portnum, "vlan":vId, "vlan_name":vName}
+
+  def getL2Data(self):
+    data = {}
+    for mac, fields in self.macTable.items():
+      data[self.getMacFromOIDString(mac)] = {"if_index":fields["ifindex"], "if_name":self.interfaceTable[fields["ifindex"]]["name"], \
+                                             "if_alias":self.interfaceTable[fields["ifindex"]]["alias"], \
+                                             "if_description":self.interfaceTable[fields["ifindex"]]["description"], \
+                                             "if_speed":self.interfaceTable[fields["ifindex"]]["speed"], \
+                                             "if_mtu":self.interfaceTable[fields["ifindex"]]["mtu"], "if_pvid":self.interfaceTable[fields["ifindex"]]["pvid"], \
+                                             "client_mac":self.getMacFromOIDString(mac), "vlan":fields["vlan"], "vlan_name":fields["vlan_name"], \
+                                             "device_name":self.name, "device_system":self.system, "device_location":self.location}
+    return data
 
 
 
