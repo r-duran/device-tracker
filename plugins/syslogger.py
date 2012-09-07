@@ -8,7 +8,7 @@ class Syslogger:
   def output(self, data):
     syslog.openlog("device-tracker")
     for key, value in data.items():
-      msg = 'client_mac = "' + key +'" '
+      msg = ''
       for name, field in value.items():
         msg = msg + name + '="' + field + '" '
       syslog.syslog(msg)
