@@ -9,10 +9,8 @@ f.close()
 
 factory = PluginFactory()
 dev = factory.getDevicePlugin('generic', '192.168.10.98', 'as4950')
-print dev.name
-print dev.system
-print dev.location
-
+output = factory.getOutputPlugin('syslogger')
+output.output(dev.getL2Data())
 
 
 
