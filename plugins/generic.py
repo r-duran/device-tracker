@@ -131,8 +131,12 @@ class Generic:
     self.buildVlanTable()
     for vId, vName in self.vlanTable.items():
       macVlanTable = self.getStrippedOIDKeyValueData(self.macVlanOID+"."+vId, self.community)
+      portNumToIfIndexTable = self.getStrippedOIDKeyValueData(self.portnumToIfIndexOID, self.community)
       for mac,portnum in macVlanTable.items():
-        self.macTable[mac] = {"ifindex":portnum, "ifnum":portnum, "vlan":vId, "vlan_name":vName}
+        try:
+          self.macTable[mac] = {"ifindex":portNumToIfIndexTable[portnum], "ifnum":portnum, "vlan":vId, "vlan_name":vName}
+        except KeyError:
+          continue
 
   def getL2Data(self):
     data = {}
