@@ -2,6 +2,10 @@
 import subprocess, re
 
 class Generic:
+
+  config_name = "generic"
+  plugin_type = "device"
+
   ifIndexOID = ".1.3.6.1.2.1.2.2.1.1"
   ifDescriptionOID = ".1.3.6.1.2.1.2.2.1.2"
   ifTypeOID = ".1.3.6.1.2.1.2.2.1.3"

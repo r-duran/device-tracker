@@ -1,11 +1,19 @@
 # -*- coding: utf-8 -*-
-import pprint
+import yaml
+import inspect
+from plugin_factory import PluginFactory
 
-from plugins.generic import Generic
+f = open('config.yml', 'r')
+config = yaml.load(f)
+f.close()
 
-pp = pprint.PrettyPrinter(depth=6)
+factory = PluginFactory()
+dev = factory.getDevicePlugin('generic', '192.168.10.98', 'as4950')
+print dev.name
+print dev.system
+print dev.location
 
-dev = Generic('192.168.10.98', 'as4950')
 
-print dev.getL2Data()
+
+
 
