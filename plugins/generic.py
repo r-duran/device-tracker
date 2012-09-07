@@ -40,14 +40,14 @@ class Generic:
   def __init__(self, device, community):
     self.ip = device
     self.community = community
-    self.name = self.getStrippedOIDKeyValueData(self.deviceNameOID)["0"]
-    self.system = self.getStrippedOIDKeyValueData(self.deviceSystemOID)["0"]
-    self.location = self.getStrippedOIDKeyValueData(self.deviceLocationOID)["0"]
+    self.name = self.getStrippedOIDKeyValueData(self.deviceNameOID, self.community)["0"]
+    self.system = self.getStrippedOIDKeyValueData(self.deviceSystemOID, self.community)["0"]
+    self.location = self.getStrippedOIDKeyValueData(self.deviceLocationOID, self.community)["0"]
     
     self.buildMacTable()
 
-  def getStrippedOIDKeyValueData(self, oid):
-    args = ['snmpbulkwalk', '-v2c', '-OnQ', '-c', self.community, self.ip, oid]
+  def getStrippedOIDKeyValueData(self, oid, community):
+    args = ['snmpbulkwalk', '-v2c', '-OnQ', '-c', community, self.ip, oid]
     output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
     pattern = oid.replace(".","\.")+"\."+"([^\s]+)\s+=\s+(.*)"
     output = output.replace("\r","")
@@ -60,8 +60,8 @@ class Generic:
       data[k] = v
     return data
 
-  def getStrippedOIDKeyData(self, oid):
-    args = ['snmpbulkwalk', '-v2c', '-OnQ', '-c', self.community, self.ip, oid]
+  def getStrippedOIDKeyData(self, oid, community):
+    args = ['snmpbulkwalk', '-v2c', '-OnQ', '-c', community, self.ip, oid]
     output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
     pattern = oid.replace(".","\.")+"\."+"([^\s]+)\s+="
     data = re.findall(pattern, output)
@@ -76,7 +76,7 @@ class Generic:
     return speed
 
   def buildVlanTable(self):
-    self.vlanTable = self.getStrippedOIDKeyValueData(self.vlanNameOID)
+    self.vlanTable = self.getStrippedOIDKeyValueData(self.vlanNameOID, self.community)
 
   def getMacFromOIDString(self, oid):
     match = re.match("(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})", oid)
@@ -92,13 +92,13 @@ class Generic:
     return macStr
 
   def buildInterfaceTable(self):
-    ifIndexArray = self.getStrippedOIDKeyData(self.ifIndexOID)
-    ifNameTable = self.getStrippedOIDKeyValueData(self.ifNameOID)
-    ifAliasTable = self.getStrippedOIDKeyValueData(self.ifAliasOID)
-    ifSpeedTable = self.getStrippedOIDKeyValueData(self.ifSpeedOID)
-    ifMtuTable = self.getStrippedOIDKeyValueData(self.ifMtuOID)
-    ifDescriptionTable = self.getStrippedOIDKeyValueData(self.ifDescriptionOID)
-    ifPvidTable = self.getStrippedOIDKeyValueData(self.ifPvidOID)
+    ifIndexArray = self.getStrippedOIDKeyData(self.ifIndexOID, self.community)
+    ifNameTable = self.getStrippedOIDKeyValueData(self.ifNameOID, self.community)
+    ifAliasTable = self.getStrippedOIDKeyValueData(self.ifAliasOID, self.community)
+    ifSpeedTable = self.getStrippedOIDKeyValueData(self.ifSpeedOID, self.community)
+    ifMtuTable = self.getStrippedOIDKeyValueData(self.ifMtuOID, self.community)
+    ifDescriptionTable = self.getStrippedOIDKeyValueData(self.ifDescriptionOID, self.community)
+    ifPvidTable = self.getStrippedOIDKeyValueData(self.ifPvidOID, self.community)
     
     for i in ifIndexArray:
       value = "-"
@@ -130,14 +130,14 @@ class Generic:
     self.buildInterfaceTable()
     self.buildVlanTable()
     for vId, vName in self.vlanTable.items():
-      macVlanTable = self.getStrippedOIDKeyValueData(self.macVlanOID+"."+vId)
+      macVlanTable = self.getStrippedOIDKeyValueData(self.macVlanOID+"."+vId, self.community)
       for mac,portnum in macVlanTable.items():
-        self.macTable[mac] = {"ifindex":portnum, "vlan":vId, "vlan_name":vName}
+        self.macTable[mac] = {"ifindex":portnum, "ifnum":portnum, "vlan":vId, "vlan_name":vName}
 
   def getL2Data(self):
     data = {}
     for mac, fields in self.macTable.items():
-      data[self.getMacFromOIDString(mac)] = {"if_index":fields["ifindex"], "if_name":self.interfaceTable[fields["ifindex"]]["name"], \
+      data[self.getMacFromOIDString(mac)] = {"if_index":fields["ifindex"], "if_num":fields["ifnum"], "if_name":self.interfaceTable[fields["ifindex"]]["name"], \
                                              "if_alias":self.interfaceTable[fields["ifindex"]]["alias"], \
                                              "if_description":self.interfaceTable[fields["ifindex"]]["description"], \
                                              "if_speed":self.interfaceTable[fields["ifindex"]]["speed"], \

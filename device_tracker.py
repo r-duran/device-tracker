@@ -8,7 +8,7 @@ config = yaml.load(f)
 f.close()
 
 factory = PluginFactory()
-dev = factory.getDevicePlugin('generic', '192.168.10.98', 'as4950')
+dev = factory.getDevicePlugin('cisco', '192.168.11.21', 'as4950')
 output = factory.getOutputPlugin('syslogger')
 output.output(dev.getL2Data())
 
