@@ -143,7 +143,7 @@ class Generic:
                                              "if_speed":self.interfaceTable[fields["ifindex"]]["speed"], \
                                              "if_mtu":self.interfaceTable[fields["ifindex"]]["mtu"], "if_pvid":self.interfaceTable[fields["ifindex"]]["pvid"], \
                                              "client_mac":self.getMacFromOIDString(mac), "vlan":fields["vlan"], "vlan_name":fields["vlan_name"], \
-                                             "device_name":self.name, "device_system":self.system, "device_location":self.location}
+                                             "device_name":self.name, "device_system":self.system, "device_location":self.location, "device_ip":self.ip}
     return data
 
 
