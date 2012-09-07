@@ -10,5 +10,5 @@ class Syslogger:
     for key, value in data.items():
       msg = 'client_mac = "' + key +'" '
       for name, field in value.items():
-        msg = msg + name + ' = "' + field + '" '
+        msg = msg + name + '="' + field + '" '
       syslog.syslog(msg)
