@@ -1,36 +1,36 @@
 devices:
   192.168.10.98:
-    layer: [l2]
+    layers: [l2]
     device: generic
     output: syslogger
     community: public
 
   192.168.10.50:
-    layer: [l2,l3]
+    layers: [l2,l3]
     device: generic
     output: syslogger
     community: public
 
   192.168.10.100:
-    layer: [l2]
+    layers: [l2]
     device: generic
     output: syslogger
     community: public
 
   192.168.10.101:
-    layer: [l2]
+    layers: [l2]
     device: generic
     output: syslogger
     community: public
 
   192.168.10.118:
-    layer: [l2]
+    layers: [l2]
     device: generic
     output: syslogger
     community: public
 
   192.168.11.21:
-    layer: [l2]
+    layers: [l2]
     device: cisco
     output: syslogger
     community: public
