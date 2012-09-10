@@ -134,12 +134,12 @@ class Generic:
         else:
           word = digit
       if (c != 15) and (c % 2 == 1):
-        if digit == "00":
-          digit = "0"
+        if word == "" and digit[0] == "0":
+          digit = digit[1]
         ip = ip + word + digit + ":"
       if (c == 15) and (c % 2 == 1):
-        if digit == "00":
-          digit = "0"
+        if word == "" and digit[0] == "0":
+          digit = digit[1]
         ip = ip + word + digit
       c = c + 1
     return ip
@@ -210,7 +210,22 @@ class Generic:
        ip = self.getIpV4FromOIDString(ip)
        mac = self.getMacFromString(mac)
        if (ip != "-") and (mac != "-") and (mac != "00:00:00:00:00:00"):
-        data[ip] = mac
+        data[ip] = {"client_ip":ip, "client_mac":mac, "device_name":self.name, "device_system":self.system, "device_location":self.location, "device_ip":self.ip}
+
+    ipv6Table = self.getStrippedOIDKeyValueData(self.ipV6ArpOID, self.community)
+    if len(ipv6Table) > 0:
+      for ip, mac in ipv6Table.items():
+        ip = self.getIpV6FromOIDString(ip)
+        mac = self.getMacFromString(mac)
+        if (ip != "-") and (mac != "-") and (mac != "00:00:00:00:00:00"):
+          data[ip] = {"client_ip":ip, "client_mac":mac, "device_name":self.name, "device_system":self.system, "device_location":self.location, "device_ip":self.ip}
+    else:
+      ipv6Table = self.getStrippedOIDKeyValueData(self.ipV4V6ArpOID, self.community)
+      for ip, mac in ipv6Table.items():
+        ip = self.getIpV6FromOIDString(ip)
+        mac = self.getMacFromString(mac)
+        if (ip != "-") and (mac != "-") and (mac != "00:00:00:00:00:00"):
+          data[ip] = {"client_ip":ip, "client_mac":mac, "device_name":self.name, "device_system":self.system, "device_location":self.location, "device_ip":self.ip}
     return data
 
 
