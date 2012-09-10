@@ -19,6 +19,10 @@ class Generic:
   macVlanOID = ".1.3.6.1.2.1.17.7.1.2.2.1.2"
   portnumToIfIndexOID = ".1.3.6.1.2.1.17.1.4.1.2"
   
+  ipV4V6ArpOID = ".1.3.6.1.2.1.4.35.1.4"
+  ipV4ArpOID = ".1.3.6.1.2.1.4.22.1.2"
+  ipV6ArpOID = ".1.3.6.1.2.1.55.1.12.1.2"
+  
   vlanNameOID = ".1.3.6.1.2.1.17.7.1.4.3.1.1"
 
   deviceNameOID = ".1.3.6.1.2.1.1.5"
@@ -91,6 +95,55 @@ class Generic:
       macStr = macStr.lstrip(":")
     return macStr
 
+  def getMacFromString(self, macStr):
+    macStr = macStr.strip().lower().replace(" ", ":")
+    match = re.findall("([0-9a-f]{1,2}):([0-9a-f]{1,2}):([0-9a-f]{1,2}):([0-9a-f]{1,2}):([0-9a-f]{1,2}):([0-9a-f]{1,2})", macStr)
+    if not match:
+      return "-"
+    mac = []
+    for m in match[0]:
+      if len(m) == 1:
+        m = "0" + m
+      mac.append(m)
+    return ":".join(mac)
+
+  def getIpV4FromOIDString(self, oid):
+    match = re.findall("(\d{1,3})", oid)
+    ip = "-"
+    if len(match) > 4:
+      ip = ".".join(match[-4:])
+    return ip
+
+  def getIpV6FromOIDString(self, oid):
+    match = re.findall("(\d{1,3})", oid)
+    if len(match) < 17:
+      return "-"
+    match = match[-16:]
+    ip = ""
+    word = ""
+    c = 0
+    for m in match:
+      digit = hex(int(m)).replace("0x", "")
+      if len(digit) == 1:
+        digit = "0" + digit
+      if (c % 2 == 0):
+        if digit == "00":
+          word = ""
+        elif digit[0] == "0":
+          word = digit[1]
+        else:
+          word = digit
+      if (c != 15) and (c % 2 == 1):
+        if digit == "00":
+          digit = "0"
+        ip = ip + word + digit + ":"
+      if (c == 15) and (c % 2 == 1):
+        if digit == "00":
+          digit = "0"
+        ip = ip + word + digit
+      c = c + 1
+    return ip
+
   def buildInterfaceTable(self):
     ifIndexArray = self.getStrippedOIDKeyData(self.ifIndexOID, self.community)
     ifNameTable = self.getStrippedOIDKeyValueData(self.ifNameOID, self.community)
@@ -148,6 +201,16 @@ class Generic:
                                              "if_mtu":self.interfaceTable[fields["ifindex"]]["mtu"], "if_pvid":self.interfaceTable[fields["ifindex"]]["pvid"], \
                                              "client_mac":self.getMacFromOIDString(mac), "vlan":fields["vlan"], "vlan_name":fields["vlan_name"], \
                                              "device_name":self.name, "device_system":self.system, "device_location":self.location, "device_ip":self.ip}
+    return data
+
+  def getL3Data(self):
+    data = {}
+    ipv4Table = self.getStrippedOIDKeyValueData(self.ipV4ArpOID, self.community)
+    for ip, mac in ipv4Table.items():
+       ip = self.getIpV4FromOIDString(ip)
+       mac = self.getMacFromString(mac)
+       if (ip != "-") and (mac != "-") and (mac != "00:00:00:00:00:00"):
+        data[ip] = mac
     return data
 
 
