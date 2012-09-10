@@ -6,11 +6,15 @@ from multiprocessing import Process
 from plugin_factory import PluginFactory
 
 
-def runProcess(device_type, output_type, device_ip, community):
+def runProcess(device_type, output_type, device_layers, device_ip, community):
   print dev + " - " + device_type
   device = factory.getDevicePlugin(device_type, device_ip, community)
   output = factory.getOutputPlugin(output_type)
-  output.output(device.getL2Data())
+  for l in device_layers:
+    if l.lower() == "l2":
+      output.output(device.getL2Data())
+    if l.lower() == "l3":
+      output.output(device.getL3Data())
 
 f = open('config.yml', 'r')
 config = yaml.load(f)
@@ -22,7 +26,7 @@ factory = PluginFactory()
 processes = {}
 print time.time()
 for dev, options in config["devices"].items():
-  processes[dev] = Process(target=runProcess, args=(options["device"], options["output"], dev, options["community"]))
+  processes[dev] = Process(target=runProcess, args=(options["device"], options["output"], options["layer"], dev, options["community"]))
   processes[dev].start()
 for dev, process in processes.items():
   process.join()
