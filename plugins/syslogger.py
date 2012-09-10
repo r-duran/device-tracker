@@ -11,4 +11,5 @@ class Syslogger:
       msg = ''
       for name, field in value.items():
         msg = msg + name + '="' + field + '" '
+      msg = msg + 'layer="' + layer + '" '
       syslog.syslog(msg)
