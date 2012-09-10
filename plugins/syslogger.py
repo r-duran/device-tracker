@@ -5,7 +5,7 @@ class Syslogger:
   config_name = "syslogger"
   plugin_type = "output"
 
-  def output(self, data):
+  def output(self, data, layer):
     syslog.openlog("device-tracker")
     for key, value in data.items():
       msg = ''
