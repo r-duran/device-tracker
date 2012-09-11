@@ -2,6 +2,7 @@
 import yaml
 import inspect
 import time
+import sys
 from multiprocessing import Process
 from plugin_factory import PluginFactory
 
@@ -16,13 +17,20 @@ def runProcess(device_type, output_type, device_layers, device_ip, community):
     if l.lower() == "l3":
       output.output(device.getL3Data(), l)
 
-f = open('config.yml', 'r')
+if len(sys.argv) < 3:
+  print "Config file location needed! use -f 'configfile' commandline argument."
+  exit()
+elif sys.argv[1] != "-f":
+  print "Config file location needed! use -f 'configfile' commandline argument."
+  exit()
+
+f = open(sys.argv[2], 'r')
 config = yaml.load(f)
 print config
 f.close()
 
 
-factory = PluginFactory()
+factory = PluginFactory(config["plugins_dir"])
 processes = {}
 print time.time()
 for dev, options in config["devices"].items():
