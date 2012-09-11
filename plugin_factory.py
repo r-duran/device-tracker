@@ -7,11 +7,14 @@ class PluginFactory:
   device_plugins = {}
   output_plugins = {}
   
-  def __init__(self):
+  path = ""
+  
+  def __init__(self, path):
+    self.path = path
     self.registerPlugins()
 
   def registerPlugins(self):
-    for root, dirs, files in  os.walk("plugins"):
+    for root, dirs, files in  os.walk(self.path):
       for file in files:
         if (os.path.splitext(file)[1] == ".py") and (not os.path.splitext(file)[0].startswith("__")):
           try:
