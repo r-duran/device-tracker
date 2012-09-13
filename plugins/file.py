@@ -5,7 +5,7 @@ class File:
   config_name = "file"
   plugin_type = "output"
   
-  output_path = "device-tracker.log"
+  output_path = "devices.log"
 
   def output(self, data, layer):
     try:
@@ -15,9 +15,9 @@ class File:
             print traceback.format_exc()
     else:
       for key, value in data.items():
-        msg = ''
+        msg = '{ "@timestamp": "' + value["timestamp"] + '", "@fields": { '
         for name, field in value.items():
-          msg = msg + name + '="' + field + '" '
-        msg = msg + 'layer="' + layer + '" \n'
+          msg = msg + '"' +name + '": "' + field + '", '
+        msg = msg + '"layer": "' + layer + '" } }\n'
         f.write(msg)
       f.close()
