@@ -15,6 +15,6 @@ class Cisco(Generic):
       macVlanTable = self.getStrippedOIDKeyValueData(self.macVlanOID, self.community+"@"+vId)
       portNumToIfIndexTable = self.getStrippedOIDKeyValueData(self.portnumToIfIndexOID, self.community+"@"+vId)
       for mac,portnum in macVlanTable.items():
-        self.macTable[mac] = {"ifindex":portNumToIfIndexTable[portnum], "ifnum":portnum, "vlan":vId, "vlan_name":vName}
+        self.macTable[mac] = {"ifindex":portNumToIfIndexTable[portnum], "ifnum":portnum, "vlan":vId, "vlanname":vName}
 
 
