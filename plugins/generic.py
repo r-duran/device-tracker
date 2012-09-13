@@ -187,7 +187,7 @@ class Generic:
       portNumToIfIndexTable = self.getStrippedOIDKeyValueData(self.portnumToIfIndexOID, self.community)
       for mac,portnum in macVlanTable.items():
         try:
-          self.macTable[mac] = {"ifindex":portNumToIfIndexTable[portnum], "ifnum":portnum, "vlan":vId, "vlan_name":vName}
+          self.macTable[mac] = {"ifindex":portNumToIfIndexTable[portnum], "ifnum":portnum, "vlan":vId, "vlanname":vName}
         except KeyError:
           continue
 
