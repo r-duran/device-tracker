@@ -201,7 +201,7 @@ class Generic:
                                              "ifspeed":self.interfaceTable[fields["ifindex"]]["speed"], "timestamp":timestamp, \
                                              "ifmtu":self.interfaceTable[fields["ifindex"]]["mtu"], "ifpvid":self.interfaceTable[fields["ifindex"]]["pvid"], \
                                              "clientmac":self.getMacFromOIDString(mac), "vlan":fields["vlan"], "vlanname":fields["vlanname"], \
-                                             "devicename":self.name, "devicesystem":self.system, "devicelocation":self.location, "deviceip":self.ip}
+                                             "devicename":self.name, "devicesystem":self.system, "devicelocation":self.location, "deviceip":self.ip, "layer":"l2"}
     return data
 
   def getL3Data(self):
@@ -212,7 +212,7 @@ class Generic:
        ip = self.getIpV4FromOIDString(ip)
        mac = self.getMacFromString(mac)
        if (ip != "-") and (mac != "-") and (mac != "00:00:00:00:00:00"):
-        data[ip] = {"clientip":ip, "clientmac":mac, "devicename":self.name, "devicesystem":self.system, "devicelocation":self.location, "deviceip":self.ip, "timestamp":timestamp}
+        data[ip] = {"clientip":ip, "clientmac":mac, "devicename":self.name, "devicesystem":self.system, "devicelocation":self.location, "deviceip":self.ip, "timestamp":timestamp, "layer":"l3"}
 
     ipv6Table = self.getStrippedOIDKeyValueData(self.ipV6ArpOID, self.community)
     if len(ipv6Table) > 0:
@@ -220,14 +220,14 @@ class Generic:
         ip = self.getIpV6FromOIDString(ip)
         mac = self.getMacFromString(mac)
         if (ip != "-") and (mac != "-") and (mac != "00:00:00:00:00:00"):
-          data[ip] = {"clientip":ip, "clientmac":mac, "devicename":self.name, "devicesystem":self.system, "devicelocation":self.location, "deviceip":self.ip, "timestamp":timestamp}
+          data[ip] = {"clientip":ip, "clientmac":mac, "devicename":self.name, "devicesystem":self.system, "devicelocation":self.location, "deviceip":self.ip, "timestamp":timestamp, "layer":"l3"}
     else:
       ipv6Table = self.getStrippedOIDKeyValueData(self.ipV4V6ArpOID, self.community)
       for ip, mac in ipv6Table.items():
         ip = self.getIpV6FromOIDString(ip)
         mac = self.getMacFromString(mac)
         if (ip != "-") and (mac != "-") and (mac != "00:00:00:00:00:00"):
-          data[ip] = {"clientip":ip, "clientmac":mac, "devicename":self.name, "devicesystem":self.system, "devicelocation":self.location, "deviceip":self.ip, "timestamp":timestamp}
+          data[ip] = {"clientip":ip, "clientmac":mac, "devicename":self.name, "devicesystem":self.system, "devicelocation":self.location, "deviceip":self.ip, "timestamp":timestamp, "layer":"l3"}
     return data
 
 
