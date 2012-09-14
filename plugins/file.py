@@ -7,7 +7,7 @@ class File:
   
   output_path = "devices.log"
 
-  def output(self, data, layer):
+  def output(self, data):
     try:
       f = open(self.output_path, 'a')
     except IOError:
@@ -15,9 +15,9 @@ class File:
             print traceback.format_exc()
     else:
       for key, value in data.items():
-        msg = '{ "@timestamp": "' + value["timestamp"] + '", "@fields": { '
+        msg = '{ '
         for name, field in value.items():
           msg = msg + '"' +name + '": "' + field + '", '
-        msg = msg + '"layer": "' + layer + '" } }\n'
+        msg = msg + '" }\n'
         f.write(msg)
       f.close()

@@ -5,11 +5,11 @@ class Syslogger:
   config_name = "syslogger"
   plugin_type = "output"
 
-  def output(self, data, layer):
+  def output(self, data):
     syslog.openlog("device-tracker")
     for key, value in data.items():
-      msg = '{ "@timestamp": "' + value["timestamp"] + '", "@fields": { '
+      msg = '{ '
       for name, field in value.items():
         msg = msg + '"' +name + '": "' + field + '", '
-      msg = msg + '"layer": "' + layer + '" } }\n'
+      msg = msg + '" }\n'
       syslog.syslog(msg)
