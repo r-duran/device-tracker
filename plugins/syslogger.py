@@ -11,5 +11,5 @@ class Syslogger:
       msg = '{ '
       for name, field in value.items():
         msg = msg + '"' +name + '": "' + field + '", '
-      msg = msg + '" }\n'
+      msg = msg.rstrip(', ') + ' }\n'
       syslog.syslog(msg)
