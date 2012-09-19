@@ -13,13 +13,17 @@ def runProcess(q, device_type, output_type, device_layers, device_ip, community)
   for l in device_layers:
     if l.lower() == "l2":
       try:
-        q.put({"data":device.getL2Data(), "type":output_type, "device":device_ip})
+        data = device.getL2Data()
+        if data:
+          q.put({"data":data, "type":output_type, "device":device_ip})
       except:
         print "Cant put result to queue"
         print traceback.format_exc()
     if l.lower() == "l3":
       try:
-        q.put({"data":device.getL3Data(), "type":output_type, "device":device_ip})
+        data = device.getL2Data()
+        if data:
+          q.put({"data":data, "type":output_type, "device":device_ip})
       except:
         print "Cant put result to queue"
         print traceback.format_exc()

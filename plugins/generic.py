@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import subprocess, re, datetime
+import subprocess, re, datetime, traceback
 
 class Generic:
 
@@ -40,18 +40,24 @@ class Generic:
   name=""
   system=""
   location=""
+  isOnline = True
   
   def __init__(self, device, community):
     self.ip = device
     self.community = community
-    self.name = self.getStrippedOIDKeyValueData(self.deviceNameOID, self.community)["0"]
-    self.system = self.getStrippedOIDKeyValueData(self.deviceSystemOID, self.community)["0"]
-    self.location = self.getStrippedOIDKeyValueData(self.deviceLocationOID, self.community)["0"]
-    
-    self.buildMacTable()
+    try:
+      self.name = self.getStrippedOIDKeyValueData(self.deviceNameOID, self.community)["0"]
+      self.system = self.getStrippedOIDKeyValueData(self.deviceSystemOID, self.community)["0"]
+      self.location = self.getStrippedOIDKeyValueData(self.deviceLocationOID, self.community)["0"]
+    except:
+      self.isOnline = False
+      print "Cant get device info : " + device + ". Is it online?"
+      print traceback.format_exc()
+    else:  
+      self.buildMacTable()
 
   def getStrippedOIDKeyValueData(self, oid, community):
-    args = ['snmpbulkwalk', '-v2c', '-OnQ', '-c', community, self.ip, oid]
+    args = ['snmpbulkwalk', '-r', '2', '-t', '3', '-v2c', '-OnQ', '-c', community, self.ip, oid]
     output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
     pattern = oid.replace(".","\.")+"\."+"([^\s]+)\s+=\s+(.*)"
     output = output.replace("\r","")
@@ -65,7 +71,7 @@ class Generic:
     return data
 
   def getStrippedOIDKeyData(self, oid, community):
-    args = ['snmpbulkwalk', '-v2c', '-OnQ', '-c', community, self.ip, oid]
+    args = ['snmpbulkwalk', '-r', '2', '-t', '3', '-v2c', '-OnQ', '-c', community, self.ip, oid]
     output = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
     pattern = oid.replace(".","\.")+"\."+"([^\s]+)\s+="
     data = re.findall(pattern, output)
@@ -193,6 +199,8 @@ class Generic:
 
   def getL2Data(self):
     data = {}
+    if not self.isOnline:
+      return data
     timestamp = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
     for mac, fields in self.macTable.items():
       data[self.getMacFromOIDString(mac)] = {"ifindex":fields["ifindex"], "ifnum":fields["ifnum"], "ifname":self.interfaceTable[fields["ifindex"]]["name"], \
@@ -206,6 +214,8 @@ class Generic:
 
   def getL3Data(self):
     data = {}
+    if not self.isOnline:
+      return data
     timestamp = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
     ipv4Table = self.getStrippedOIDKeyValueData(self.ipV4ArpOID, self.community)
     for ip, mac in ipv4Table.items():
