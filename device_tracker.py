@@ -21,7 +21,7 @@ def runProcess(q, device_type, output_type, device_layers, device_ip, community)
         print traceback.format_exc()
     if l.lower() == "l3":
       try:
-        data = device.getL2Data()
+        data = device.getL3Data()
         if data:
           q.put({"data":data, "type":output_type, "device":device_ip})
       except:
